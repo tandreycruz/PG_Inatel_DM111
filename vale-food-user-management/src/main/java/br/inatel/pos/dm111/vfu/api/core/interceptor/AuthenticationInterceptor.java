@@ -110,15 +110,22 @@ public class AuthenticationInterceptor implements HandlerInterceptor
 			throw new ApiException(AppErrorCode.INVALID_USER_CREDENTIALS);
 		}
 		
-		if (appJwtToken.uri().startsWith("/valefood/restaurants"))
+		if (appJwtToken.uri().startsWith("/valefood/users/"))
 		{
-			if (User.UserType.RESTAURANT != user.type())
+			var splitUri = appJwtToken.uri().split("/");
+			var pathUserId = splitUri[3];
+			if (!user.id().equals(pathUserId))
 			{
-				log.info("Operation not supported for this type of user: {}", user.type());
-				throw new ApiException(AppErrorCode.OPERATION_NOT_SUPPORTED);
+				log.info("User provided didn't match to the user Id. path user id: {} and user id: {}", pathUserId, user.id());
+				throw new ApiException(AppErrorCode.INVALID_USER_CREDENTIALS);
 			}
 		}
 		
+		if (appJwtToken.uri().startsWith("/valefood/users"))
+		{
+			log.info("Read all restaurants are no longer supported.");
+			throw new ApiException(AppErrorCode.OPERATION_NOT_SUPPORTED);
+		}
 	}
 
 	private boolean isJwtAuthRequired(String method, String uri)
@@ -133,10 +140,6 @@ public class AuthenticationInterceptor implements HandlerInterceptor
 			{
 				return true;
 			}
-		}
-		else if (uri.equals("/valefood/restaurants"))
-		{
-			return true;
 		}
 		return true;
 	}

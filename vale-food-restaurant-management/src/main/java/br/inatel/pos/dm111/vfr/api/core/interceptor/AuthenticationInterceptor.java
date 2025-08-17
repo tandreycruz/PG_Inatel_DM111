@@ -15,6 +15,8 @@ import com.google.cloud.storage.HttpMethod;
 
 import br.inatel.pos.dm111.vfr.api.core.ApiException;
 import br.inatel.pos.dm111.vfr.api.core.AppErrorCode;
+import br.inatel.pos.dm111.vfr.persistence.restaurant.Restaurant;
+import br.inatel.pos.dm111.vfr.persistence.restaurant.RestaurantRepository;
 import br.inatel.pos.dm111.vfr.persistence.user.User;
 import br.inatel.pos.dm111.vfr.persistence.user.UserRepository;
 import io.jsonwebtoken.JwtException;
@@ -33,12 +35,14 @@ public class AuthenticationInterceptor implements HandlerInterceptor
 	private String tokenIssuer;
 	
 	private final JwtParser jwtParser;
-	private final UserRepository repository;
+	private final UserRepository userRepository;
+	private final RestaurantRepository restaurantRepository;
 	
-	public AuthenticationInterceptor(JwtParser jwtParser, UserRepository repository)
+	public AuthenticationInterceptor(JwtParser jwtParser, UserRepository userRepository, RestaurantRepository restaurantRepository)
 	{
 		this.jwtParser = jwtParser;
-		this.repository = repository;
+		this.userRepository = userRepository;
+		this.restaurantRepository = restaurantRepository;
 	}
 	
 	@Override
@@ -46,11 +50,6 @@ public class AuthenticationInterceptor implements HandlerInterceptor
 	{
 		var method = request.getMethod();
 		var uri = request.getRequestURI();
-		
-		if (!isJwtAuthRequired(method, uri))
-		{
-			return true;
-		}
 		
 		//Jwt token validation
 		var token = request.getHeader("Token");
@@ -110,46 +109,47 @@ public class AuthenticationInterceptor implements HandlerInterceptor
 			throw new ApiException(AppErrorCode.INVALID_USER_CREDENTIALS);
 		}
 		
-		if (appJwtToken.uri().startsWith("/valefood/restaurants"))
+		if (appJwtToken.uri().startsWith("/valefood/restaurants/"))
 		{
-			if (User.UserType.RESTAURANT != user.type())
+			if (appJwtToken.method().equals(HttpMethod.PUT.name()) || appJwtToken.method().equals(HttpMethod.DELETE.name()))
 			{
-				log.info("Operation not supported for this type of user: {}", user.type());
-				throw new ApiException(AppErrorCode.OPERATION_NOT_SUPPORTED);
+				var splitUri = appJwtToken.uri().split("/");
+				var pathRestaurantId = splitUri[3];
+				var restaurant = retrieveRestaurantById(pathRestaurantId).orElseThrow(() -> {
+					log.info("Restaurant does not exist");
+					return new ApiException(AppErrorCode.INVALID_USER_CREDENTIALS);
+				});
+				if (!user.id().equals(restaurant.userId()))
+				{
+					log.info("User provided didn't match to the user linked to restaurant user id: {}", user.id());
+					throw new ApiException(AppErrorCode.INVALID_USER_CREDENTIALS);
+				}
 			}
 		}
-		
 	}
 
-	private boolean isJwtAuthRequired(String method, String uri)
-	{
-		if (uri.equals("/valefood/users"))
-		{
-			if (HttpMethod.POST.name().equals(method))
-			{
-				return false;
-			}
-			else
-			{
-				return true;
-			}
-		}
-		else if (uri.equals("/valefood/restaurants"))
-		{
-			return true;
-		}
-		return true;
-	}
-	
 	private Optional<User> retrieveUserByEmail(String email) throws ApiException
 	{
 		try
 		{
-			return repository.getByEmail(email);
+			return userRepository.getByEmail(email);
 		}
 		catch (InterruptedException | ExecutionException e)
 		{
 			log.error("Failed to read an users from DB by email.", e);
+			throw new ApiException(AppErrorCode.INTERNAL_DATABASE_COMMUNICATION_ERROR);
+		}
+	}
+	
+	private Optional<Restaurant> retrieveRestaurantById(String id) throws ApiException
+	{
+		try
+		{
+			return restaurantRepository.getById(id);
+		}
+		catch (InterruptedException | ExecutionException e)
+		{
+			log.error("Failed to read a restaurant from DB by id {}.", id, e);
 			throw new ApiException(AppErrorCode.INTERNAL_DATABASE_COMMUNICATION_ERROR);
 		}
 	}
