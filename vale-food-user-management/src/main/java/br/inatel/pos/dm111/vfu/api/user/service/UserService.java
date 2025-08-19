@@ -16,6 +16,7 @@ import br.inatel.pos.dm111.vfu.api.user.UserRequest;
 import br.inatel.pos.dm111.vfu.api.user.UserResponse;
 import br.inatel.pos.dm111.vfu.persistence.user.User;
 import br.inatel.pos.dm111.vfu.persistence.user.UserRepository;
+import br.inatel.pos.dm111.vfu.publisher.AppPublisher;
 
 @Service
 public class UserService
@@ -24,11 +25,13 @@ public class UserService
 
 	private final UserRepository repository;
 	private final PasswordEncryptor encryptor;
+	private final AppPublisher userPublisher; 
 
-	public UserService(UserRepository repository, PasswordEncryptor encryptor)
+	public UserService(UserRepository repository, PasswordEncryptor encryptor, AppPublisher userPublisher)
 	{
 		this.repository = repository;
 		this.encryptor = encryptor;
+		this.userPublisher = userPublisher;
 	}
 
 	public List<UserResponse> searchUsers() throws ApiException
@@ -54,6 +57,12 @@ public class UserService
 		
 		log.info("User was sucessfully created. Id: {}", user.id());
 		
+		var published = userPublisher.publishCreated(user);
+		if (!published)
+		{
+			//TODO either decide to make a rollback or alarm to retry later or resync users
+			log.error("User created was not published. Needs to be re published later on... User Id: {}", user.id());
+		}
 		return buildUserResponse(user);
 	}
 	

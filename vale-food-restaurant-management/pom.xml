@@ -60,6 +60,13 @@
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-jackson</artifactId>
 			<version>0.12.6</version>
+		</dependency>
+		
+		<!-- Pub Sub -->
+		<dependency>
+			<groupId>com.google.cloud</groupId>
+			<artifactId>google-cloud-pubsub</artifactId>
+			<version>1.141.2</version>
 		</dependency>		
 
 		<!-- Tests -->
