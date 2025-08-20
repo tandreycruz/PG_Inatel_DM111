@@ -67,7 +67,7 @@ public class AuthService
 	private String generateToken(User user)
 	{
 		var now = Instant.now();
-		return Jwts.builder().issuer(tokenIssuer).subject(user.email()).claim("role", user.type()).issuedAt(Date.from(now)).expiration(Date.from(now.plusSeconds(600))).signWith(privateKey).compact();
+		return Jwts.builder().issuer(tokenIssuer).subject(user.email()).claim("role", user.type()).issuedAt(Date.from(now)).expiration(Date.from(now.plusSeconds(1000))).signWith(privateKey).compact();
 	}
 
 

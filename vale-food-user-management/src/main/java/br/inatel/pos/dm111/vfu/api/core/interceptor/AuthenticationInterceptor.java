@@ -120,8 +120,7 @@ public class AuthenticationInterceptor implements HandlerInterceptor
 				throw new ApiException(AppErrorCode.INVALID_USER_CREDENTIALS);
 			}
 		}
-		
-		if (appJwtToken.uri().startsWith("/valefood/users"))
+		else if (appJwtToken.uri().startsWith("/valefood/users"))
 		{
 			log.info("Read all restaurants are no longer supported.");
 			throw new ApiException(AppErrorCode.OPERATION_NOT_SUPPORTED);

@@ -10,7 +10,6 @@ import br.inatel.pos.dm111.vfr.api.restaurant.RestaurantRequest;
 @Component
 public class RestaurantRequestValidator implements Validator
 {
-
 	@Override
 	public boolean supports(Class<?> clazz)
 	{

@@ -20,6 +20,7 @@ import br.inatel.pos.dm111.vfr.persistence.restaurant.Restaurant;
 import br.inatel.pos.dm111.vfr.persistence.restaurant.RestaurantRepository;
 import br.inatel.pos.dm111.vfr.persistence.user.User;
 import br.inatel.pos.dm111.vfr.persistence.user.UserRepository;
+import br.inatel.pos.dm111.vfr.publisher.AppPublisher;
 
 @Service
 public class RestaurantService
@@ -27,13 +28,14 @@ public class RestaurantService
 	private static final Logger log = LoggerFactory.getLogger(RestaurantService.class);
 
 	private final RestaurantRepository restaurantRepository;
-	
 	private final UserRepository userRepository;
+	private final AppPublisher restaurantPublisher;
 	
-	public RestaurantService(RestaurantRepository restaurantRepository, UserRepository userRepository)
+	public RestaurantService(RestaurantRepository restaurantRepository, UserRepository userRepository, AppPublisher restaurantPublisher)
 	{
 		this.restaurantRepository = restaurantRepository;
 		this.userRepository = userRepository;
+		this.restaurantPublisher = restaurantPublisher;
 	}
 	
 	public List<RestaurantResponse> searchRestaurants() throws ApiException
@@ -51,13 +53,19 @@ public class RestaurantService
 	
 	public RestaurantResponse createRestaurant(RestaurantRequest request) throws ApiException
 	{
-		// user exist and its type is RESTAURANT
 		validateRestaurant(request);
 		
 		var restaurant = buildRestaurant(request);
 		restaurantRepository.save(restaurant);
 		
 		log.info("Restaurant was sucessfully created. Id: {}", restaurant.id());
+		
+		var published = restaurantPublisher.publishCreated(restaurant);
+		if (!published)
+		{
+			//TODO either decide to make a rollback or alarm to retry later or resync restaurants
+			log.error("Restaurant created was not published. Needs to be re published later on... Restaurant Id: {}", restaurant.id());
+		}
 		
 		return buildRestaurantResponse(restaurant);
 	}
