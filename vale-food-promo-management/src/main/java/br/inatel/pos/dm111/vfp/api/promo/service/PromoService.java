@@ -19,6 +19,8 @@ import br.inatel.pos.dm111.vfp.persistence.promo.PromoRepository;
 import br.inatel.pos.dm111.vfp.persistence.restaurant.Product;
 import br.inatel.pos.dm111.vfp.persistence.restaurant.Restaurant;
 import br.inatel.pos.dm111.vfp.persistence.restaurant.RestaurantRepository;
+import br.inatel.pos.dm111.vfp.persistence.user.User;
+import br.inatel.pos.dm111.vfp.persistence.user.UserRepository;
 
 @Service
 public class PromoService
@@ -29,21 +31,18 @@ public class PromoService
 	
 	private final RestaurantRepository restaurantRepository;
 	
-	//private final UserRepository userRepository;
+	private final UserRepository userRepository;
 
-	//public PromoService(PromoRepository promoRepository, RestaurantRepository restaurantRepository, UserRepository userRepository)
-	public PromoService(PromoRepository promoRepository, RestaurantRepository restaurantRepository)
+	public PromoService(PromoRepository promoRepository, RestaurantRepository restaurantRepository, UserRepository userRepository)
 	{
 		this.promoRepository = promoRepository;
 		this.restaurantRepository = restaurantRepository;
-		//this.userRepository = userRepository;
+		this.userRepository = userRepository;
 	}
 	
 	
 	public List<PromoResponse> searchPromos() throws ApiException
 	{
-		//return retrievePromos().stream().map(this::buildPromoResponse).toList();
-		
 		List<PromoResponse> responses = new ArrayList<PromoResponse>();
 	    
 		List<Promo> promos = retrievePromos();
@@ -60,11 +59,6 @@ public class PromoService
 	
 	public PromoResponse searchPromo(String id) throws ApiException
 	{
-		//return retrievePromoById(id).map(this::buildPromoResponse).orElseThrow(() -> {
-		//	log.warn("Promotion was not found. Id: {}", id);
-		//	return new ApiException(AppErrorCode.PROMOTION_NOT_FOUND);
-		//});
-		
 		var promoOpt = retrievePromoById(id);
 		if (promoOpt.isEmpty())
 		{
@@ -73,6 +67,60 @@ public class PromoService
 		}
 		
 		return buildPromoResponse(promoOpt.get());		
+	}
+	
+	public List<PromoResponse> searchPromosFavoriteProductsByUser(String userId) throws ApiException
+	{
+		List<PromoResponse> responses = new ArrayList<PromoResponse>();
+	    
+		var userOpt = retrieveUserById(userId);
+		if (userOpt.isEmpty())
+		{
+			log.warn("User was not found. Id: {}", userId);
+			throw new ApiException(AppErrorCode.USER_NOT_FOUND);
+		}
+		
+		var user = userOpt.get();
+		List<Promo> promos = retrievePromos();
+		if (promos != null && promos.size() > 0)
+	    {
+			for (Promo promo : promos)
+		    {
+				var restaurantOpt = retrieveRestaurantById(promo.restaurantId());
+				if (!restaurantOpt.isEmpty())
+				{
+					var restaurant = restaurantOpt.get();
+					if (restaurant.products() != null && restaurant.products().size() > 0)
+					{
+						boolean existsFavoriteProductOnPromo = false;
+						for (Product product : restaurant.products())
+						{
+							if (product.id().equals(promo.productId()))
+							{
+								for (String favoriteProduct : user.favoriteProducts())
+								{
+									if (product.name().trim().equalsIgnoreCase(favoriteProduct.trim()))
+									{
+										existsFavoriteProductOnPromo = true;
+										break;
+									}
+								}
+							}
+							if (existsFavoriteProductOnPromo)
+							{
+								break;
+							}
+						}
+						if (existsFavoriteProductOnPromo)
+						{
+							responses.add(buildPromoResponse(promo));
+						}
+					}
+				}
+		    }
+	    }
+	    
+		return responses;
 	}
 	
 	public PromoResponse createPromo(PromoRequest request) throws ApiException
@@ -169,26 +217,6 @@ public class PromoService
 				throw new ApiException(AppErrorCode.PRODUCT_NOT_FOUND);
 			}
 		}
-		
-		
-		
-		/*
-		var userOpt = retrieveUserById(request.userId());
-		if (userOpt.isEmpty())
-		{
-			log.warn("User was not found. Id: {}", request.userId());
-			throw new ApiException(AppErrorCode.USER_NOT_FOUND);
-		}
-		else
-		{
-			var user = userOpt.get();
-			if (!User.UserType.RESTAURANT.equals(user.type()))
-			{
-				log.info("User provided is not valid for this operation. UserId: {}", request.userId());
-				throw new ApiException(AppErrorCode.INVALID_USER_TYPE);
-			}
-		}
-		*/
 	}
 	
 	private Promo buildPromo(PromoRequest request)
@@ -200,18 +228,8 @@ public class PromoService
 	
 	private Promo buildPromo(PromoRequest request, String id)
 	{
-		//var products = request.products().stream().map(this::buildProduct).toList();
-		
 		return new Promo(id, request.description(), request.restaurantId(), request.productId(), request.discountedPrice());
 	}
-	
-	/*
-	private Product buildProduct(ProductRequest request)
-	{
-		var id = UUID.randomUUID().toString();
-		return new Product(id, request.name(), request.description(), request.category(), request.price());
-	}
-	*/
 	
 	private PromoResponse buildPromoResponse(Promo promo) throws ApiException
 	{
@@ -232,15 +250,7 @@ public class PromoService
 		
 		return new PromoResponse(promo.id(), promo.description(), restaurant.name(), productName, promo.discountedPrice());
 	}
-	
 
-	/*
-	private ProductResponse buildProductResponse(Product product)
-	{
-		return new ProductResponse(product.id(), product.name(), product.description(), product.category(), product.price());
-	}
-	*/
-	
 	private List<Promo> retrievePromos() throws ApiException
 	{
 		try
@@ -279,7 +289,7 @@ public class PromoService
 			throw new ApiException(AppErrorCode.INTERNAL_DATABASE_COMMUNICATION_ERROR);
 		}
 	}
-	/*
+	
 	private Optional<User> retrieveUserById(String id) throws ApiException
 	{
 		try
@@ -292,6 +302,4 @@ public class PromoService
 			throw new ApiException(AppErrorCode.INTERNAL_DATABASE_COMMUNICATION_ERROR);
 		}
 	}
-	*/
-	
 }

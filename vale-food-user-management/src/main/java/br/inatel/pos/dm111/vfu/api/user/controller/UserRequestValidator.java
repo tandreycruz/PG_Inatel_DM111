@@ -26,6 +26,7 @@ public class UserRequestValidator implements Validator
 		ValidationUtils.rejectIfEmptyOrWhitespace(errors, "name", "name.empty", "Name is required!");
 		ValidationUtils.rejectIfEmptyOrWhitespace(errors, "email", "email.empty", "Email is required!");
 		ValidationUtils.rejectIfEmptyOrWhitespace(errors, "password", "password.empty", "Password is required!");
+		ValidationUtils.rejectIfEmpty(errors, "favoriteProducts", "favoriteProducts.empty", "Favorite Products are required!");
 		
 		var req = (UserRequest) target;
 		if (!VALID_USER_TYPES.contains(req.type()))

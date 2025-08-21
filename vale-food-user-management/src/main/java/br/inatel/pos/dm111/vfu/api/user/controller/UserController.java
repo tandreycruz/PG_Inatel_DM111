@@ -27,13 +27,6 @@ import br.inatel.pos.dm111.vfu.api.user.service.UserService;
 @RequestMapping("/valefood/users")
 public class UserController
 {
-	// @GetMapping(value = "hello")
-	// public ResponseEntity<?> hello()
-	// {
-	// return ResponseEntity.ok("hello World!");
-	// }
-	//
-	
 	private static final Logger log = LoggerFactory.getLogger(UserController.class);
 	
 	private final UserRequestValidator validator;

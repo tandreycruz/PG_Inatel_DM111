@@ -39,4 +39,25 @@ public class UserHttpPublisher implements AppPublisher
 		return true;
 	}
 	
+	@Override
+	public boolean publishUpdated(User user)
+	{
+	    var event = buildEvent(user, Event.EventType.UPDATED);
+
+	    restTemplate.put(restaurantUrl + "/" + user.id(), event.event());
+	    restTemplate.put(authUrl + "/" + user.id(), event.event());
+	    restTemplate.put(promoUrl + "/" + user.id(), event.event());
+
+	    return true;
+	}
+	
+	@Override
+	public boolean publishDeleted(String id)
+	{
+	    restTemplate.delete(restaurantUrl + "/" + id);
+	    restTemplate.delete(authUrl + "/" + id);
+	    restTemplate.delete(promoUrl + "/" + id);
+
+	    return true;
+	}
 }

@@ -12,8 +12,12 @@ public interface AppPublisher
 	
 	default UserEvent buildUserEvent(User user)
 	{
-		return new UserEvent(user.id(), user.name(), user.email(), user.password(), user.type().name());
+		return new UserEvent(user.id(), user.name(), user.email(), user.password(), user.type().name(), user.favoriteProducts());
 	}
 	
 	boolean publishCreated(User user);
+	
+	boolean publishUpdated(User user);
+	
+	boolean publishDeleted(String id);
 }

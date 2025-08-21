@@ -38,13 +38,21 @@ public class UserPubSubPublisher implements AppPublisher
 		return publishEvent(event);
 	}
 	
-	/*
+	@Override
 	public boolean publishUpdated(User user)
 	{
 		var event = buildEvent(user, Event.EventType.UPDATED);
 		return publishEvent(event);
 	}
 	
+	@Override
+	public boolean publishDeleted(String id)
+	{
+		//TODO Implement delete by id
+		return true;
+	}
+	
+	/*
 	public boolean publishDeleted(User user)
 	{
 		var event = buildEvent(user, Event.EventType.DELETED);

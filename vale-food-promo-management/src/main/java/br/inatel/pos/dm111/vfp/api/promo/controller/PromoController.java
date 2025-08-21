@@ -60,6 +60,16 @@ public class PromoController
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 	
+	@GetMapping(value = "/user/{userId}")
+	public ResponseEntity<List<PromoResponse>> getPromosFavoriteProductsByUser(@PathVariable("userId") String userId) throws ApiException
+	{
+		log.debug("Received request to list promotions by favorite products for user id: {}", userId);
+		
+		var response = service.searchPromosFavoriteProductsByUser(userId);
+		
+		return ResponseEntity.status(HttpStatus.OK).body(response);
+	}
+	
 	@PostMapping
 	public ResponseEntity<PromoResponse> postPromo(@RequestBody PromoRequest request, BindingResult bindingResult) throws ApiException
 	{

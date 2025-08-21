@@ -24,8 +24,10 @@ public class UserService
 	private static final Logger log = LoggerFactory.getLogger(UserService.class);
 
 	private final UserRepository repository;
+
 	private final PasswordEncryptor encryptor;
-	private final AppPublisher userPublisher; 
+
+	private final AppPublisher userPublisher;
 
 	public UserService(UserRepository repository, PasswordEncryptor encryptor, AppPublisher userPublisher)
 	{
@@ -38,7 +40,7 @@ public class UserService
 	{
 		return retrieveUsers().stream().map(this::buildUserResponse).toList();
 	}
-	
+
 	public UserResponse searchUser(String id) throws ApiException
 	{
 		return retrieveUserById(id).map(this::buildUserResponse).orElseThrow(() -> {
@@ -46,12 +48,11 @@ public class UserService
 			return new ApiException(AppErrorCode.USER_NOT_FOUND);
 		});
 	}
-	
+
 	public UserResponse createUser(UserRequest request) throws ApiException
 	{
 		// uniqueness by email
 		validateUser(request);
-		
 		var user = buildUser(request);
 		repository.save(user);
 		
@@ -60,12 +61,13 @@ public class UserService
 		var published = userPublisher.publishCreated(user);
 		if (!published)
 		{
-			//TODO either decide to make a rollback or alarm to retry later or resync users
+			// TODO either decide to make a rollback or alarm to retry later or resync users
 			log.error("User created was not published. Needs to be re published later on... User Id: {}", user.id());
 		}
+		
 		return buildUserResponse(user);
 	}
-	
+
 	public UserResponse updateUser(UserRequest request, String id) throws ApiException
 	{
 		// check user by id exist
@@ -86,15 +88,30 @@ public class UserService
 		
 		var user = buildUser(request, id);
 		repository.save(user);
+		
+		var published = userPublisher.publishUpdated(user);
+		if (!published)
+		{
+			// TODO either decide to make a rollback or alarm to retry later or resync users
+			log.error("User updated was not published. Needs to be re published later on... User Id: {}", id);
+		}
+		
 		return buildUserResponse(user);
 	}
-	
+
 	public void removeUser(String id) throws ApiException
 	{
 		try
 		{
 			repository.delete(id);
 			log.info("User was sucessfully deleted. id {}", id);
+			
+			var published = userPublisher.publishDeleted(id);
+			if (!published)
+			{
+				// TODO either decide to make a rollback or alarm to retry later or resync users
+				log.error("User deleted was not published. Needs to be re published later on... User Id: {}", id);
+			}
 		}
 		catch (InterruptedException | ExecutionException e)
 		{
@@ -111,24 +128,24 @@ public class UserService
 			log.warn("Provided email already in use.");
 			throw new ApiException(AppErrorCode.CONFLICTED_USER_EMAIL);
 		}
-	}	
-	
+	}
+
 	private User buildUser(UserRequest request)
 	{
 		var encryptedPwd = encryptor.encrypt(request.password());
 		var userId = UUID.randomUUID().toString();
-		return new User(userId, request.name(), request.email(), encryptedPwd, User.UserType.valueOf(request.type()));
+		return new User(userId, request.name(), request.email(), encryptedPwd, User.UserType.valueOf(request.type()), request.favoriteProducts());
 	}
 
 	private User buildUser(UserRequest request, String id)
 	{
 		var encryptedPwd = encryptor.encrypt(request.password());
-		return new User(id, request.name(), request.email(), encryptedPwd, User.UserType.valueOf(request.type()));
+		return new User(id, request.name(), request.email(), encryptedPwd, User.UserType.valueOf(request.type()), request.favoriteProducts());
 	}
 
 	private UserResponse buildUserResponse(User user)
 	{
-		return new UserResponse(user.id(), user.name(), user.email(),  user.type().name());
+		return new UserResponse(user.id(), user.name(), user.email(), user.type().name(), user.favoriteProducts());
 	}
 
 	private List<User> retrieveUsers() throws ApiException
@@ -143,7 +160,7 @@ public class UserService
 			throw new ApiException(AppErrorCode.INTERNAL_DATABASE_COMMUNICATION_ERROR);
 		}
 	}
-	
+
 	private Optional<User> retrieveUserById(String id) throws ApiException
 	{
 		try
@@ -156,7 +173,7 @@ public class UserService
 			throw new ApiException(AppErrorCode.INTERNAL_DATABASE_COMMUNICATION_ERROR);
 		}
 	}
-	
+
 	private Optional<User> retrieveUserByEmail(String email) throws ApiException
 	{
 		try

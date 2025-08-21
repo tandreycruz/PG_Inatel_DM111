@@ -1,9 +1,14 @@
 package br.inatel.pos.dm111.vfa.api.user.service;
 
+import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import br.inatel.pos.dm111.vfa.api.core.ApiException;
+import br.inatel.pos.dm111.vfa.api.core.AppErrorCode;
 import br.inatel.pos.dm111.vfa.api.user.UserRequest;
 import br.inatel.pos.dm111.vfa.persistence.user.User;
 import br.inatel.pos.dm111.vfa.persistence.user.UserRepository;
@@ -30,8 +35,58 @@ public class UserService
 		return request;
 	}
 	
+	public UserRequest updateUser(UserRequest request, String id) throws ApiException
+	{
+		// check user by id exist
+		var userOpt = retrieveUserById(id);
+		if (userOpt.isEmpty())
+		{
+			log.warn("User was not found. Id: {}", id);
+			throw new ApiException(AppErrorCode.USER_NOT_FOUND);
+		}
+		
+		var user = buildUser(request, id);
+		repository.save(user);
+		
+		log.info("User was sucessfully updated. Id: {}", user.id());
+		
+		return request;
+	}
+	
+	public void removeUser(String id) throws ApiException
+	{
+		try
+		{
+			repository.delete(id);
+			log.info("User was sucessfully deleted. id {}", id);
+		}
+		catch (InterruptedException | ExecutionException e)
+		{
+			log.error("Failed to delete an user from DB by id {}.", id, e);
+			throw new ApiException(AppErrorCode.INTERNAL_DATABASE_COMMUNICATION_ERROR);
+		}
+	}
+	
 	private User buildUser(UserRequest request)
 	{
-		return new User(request.id(), request.name(), request.email(), request.password(), User.UserType.valueOf(request.type()));
+		return new User(request.id(), request.name(), request.email(), request.password(), User.UserType.valueOf(request.type()), request.favoriteProducts());
+	}
+	
+	private User buildUser(UserRequest request, String id)
+	{
+		return new User(id, request.name(), request.email(), request.password(), User.UserType.valueOf(request.type()), request.favoriteProducts());
+	}
+	
+	private Optional<User> retrieveUserById(String id) throws ApiException
+	{
+		try
+		{
+			return repository.getById(id);
+		}
+		catch (InterruptedException | ExecutionException e)
+		{
+			log.error("Failed to read an users from DB by id {}.", id, e);
+			throw new ApiException(AppErrorCode.INTERNAL_DATABASE_COMMUNICATION_ERROR);
+		}
 	}
 }
