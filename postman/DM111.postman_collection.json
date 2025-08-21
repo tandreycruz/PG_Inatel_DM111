@@ -1,0 +1,587 @@
+{
+	"info": {
+		"_postman_id": "f53114f2-9386-4b8c-8d1f-5de1738d04d6",
+		"name": "DM111",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "44606198"
+	},
+	"item": [
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "GetAllUsers",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "localhost:8080/valefood/users",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"valefood",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetUserById",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "localhost:8080/valefood/users/{{idUser}}",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"valefood",
+								"users",
+								"{{idUser}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CreateUser",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.globals.set(\"idUser\", pm.response.json().id);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Romero\",\r\n    \"email\": \"romero@inatel.br\",\r\n    \"password\": \"admin\",\r\n    \"type\": \"RESTAURANT\",\r\n    \"favoriteProducts\": [\"Vatapa\",\"pescada\",\"acai\"]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/valefood/users",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"valefood",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UpdateUser",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"RomeroParaguaio\",\r\n    \"email\": \"romeropara@inatel.br\",\r\n    \"password\": \"admin\",\r\n    \"type\": \"RESTAURANT\",\r\n    \"favoriteProducts\": [\"pescada\"]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/valefood/users/{{idUser}}",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"valefood",
+								"users",
+								"{{idUser}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DeleteUser",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/valefood/users/{{idUSer}}",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"valefood",
+								"users",
+								"{{idUSer}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "GerarToken",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.globals.set(\"token\", pm.response.json().token);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"romero@inatel.br\",\r\n    \"password\": \"admin\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8082/valefood/auth",
+							"host": [
+								"localhost"
+							],
+							"port": "8082",
+							"path": [
+								"valefood",
+								"auth"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Restaurant",
+			"item": [
+				{
+					"name": "GetAllRestaurants",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "localhost:8081/valefood/restaurants",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"valefood",
+								"restaurants"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetRestaurantById",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "localhost:8081/valefood/restaurants/{{idRestaurant}}",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"valefood",
+								"restaurants",
+								"{{idRestaurant}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CreateRestaurant",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.globals.set(\"idRestaurant\", pm.response.json().id);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Tia Lucia\",\r\n    \"address\": \"alameda seis, 12\",\r\n    \"userId\": \"b8c0f804-3711-4253-82fe-b3032ace2507\",\r\n    \"categories\": [\"Comidas Regionais\"],\r\n    \"products\": [\r\n        {\r\n            \"name\": \"vatapa\",\r\n            \"description\": \"camarao com creme e arroz\",\r\n            \"category\": \"Comidas Regionais\",\r\n            \"price\": 25\r\n        },\r\n        {\r\n            \"name\": \"maniçoba\",\r\n            \"description\": \"folha da maniva cozida com miudos\",\r\n            \"category\": \"Comidas Regionais\",\r\n            \"price\": 25\r\n        }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8081/valefood/restaurants",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"valefood",
+								"restaurants"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UpdateRestaurant",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Tia Lucinha\",\r\n    \"address\": \"alameda seis, 12\",\r\n    \"userId\": \"86877753-1b60-4644-a8a5-adbed68d68a5\",\r\n    \"categories\": [\"Comidas Regionais\"],\r\n    \"products\": [\r\n        {\r\n            \"name\": \"vatapa\",\r\n            \"description\": \"camarao com creme e arroz\",\r\n            \"category\": \"Comidas Regionais\",\r\n            \"price\": 20\r\n        },\r\n        {\r\n            \"name\": \"maniçoba\",\r\n            \"description\": \"folha da maniva cozida com miudos\",\r\n            \"category\": \"Comidas Regionais\",\r\n            \"price\": 25\r\n        }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8081/valefood/restaurants/{{idRestaurant}}",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"valefood",
+								"restaurants",
+								"{{idRestaurant}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DeleteRestaurant",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Edilson de Sousa\",\r\n    \"email\": \"edilson00@inatel.br\",\r\n    \"password\": \"admin\",\r\n    \"type\": \"REGULAR\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8081/valefood/restaurants/{{idRestaurant}}",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"valefood",
+								"restaurants",
+								"{{idRestaurant}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Promotion",
+			"item": [
+				{
+					"name": "GetAllPromotions",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "localhost:8083/valefood/promos",
+							"host": [
+								"localhost"
+							],
+							"port": "8083",
+							"path": [
+								"valefood",
+								"promos"
+							],
+							"query": [
+								{
+									"key": "",
+									"value": "",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetPromotionById",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "localhost:8083/valefood/promos/{{idPromo}}",
+							"host": [
+								"localhost"
+							],
+							"port": "8083",
+							"path": [
+								"valefood",
+								"promos",
+								"{{idPromo}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetPromotionsFavoriteProductsByUserId",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "localhost:8083/valefood/promos/user/{{idUser}}",
+							"host": [
+								"localhost"
+							],
+							"port": "8083",
+							"path": [
+								"valefood",
+								"promos",
+								"user",
+								"{{idUser}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CreatePromotion",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.globals.set(\"idPromo\", pm.response.json().id);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"description\": \"Vatapá do Cruel SuperPromo!\",\r\n    \"restaurantId\": \"eba94db8-e493-40de-b6a7-db24919a0b39\",\r\n    \"productId\": \"5e92730f-229f-4c2b-95e2-90374df05da1\",\r\n    \"discountedPrice\": \"15.0\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8083/valefood/promos",
+							"host": [
+								"localhost"
+							],
+							"port": "8083",
+							"path": [
+								"valefood",
+								"promos"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UpdatePromotion",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"description\": \"Maniçoba do Arrocha Promo!\",\r\n    \"restaurantId\": \"d3f153fe-4e23-48bc-9c4a-8898edcd3996\",\r\n    \"productId\": \"4ccf9908-ce3f-47f5-ab7f-bd9b5e5d325d\",\r\n    \"discountedPrice\": \"20.0\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8083/valefood/promos/{{idPromo}}",
+							"host": [
+								"localhost"
+							],
+							"port": "8083",
+							"path": [
+								"valefood",
+								"promos",
+								"{{idPromo}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DeletePromotion",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Edilson de Sousa\",\r\n    \"email\": \"edilson00@inatel.br\",\r\n    \"password\": \"admin\",\r\n    \"type\": \"REGULAR\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8083/valefood/promos/{{idPromo}}",
+							"host": [
+								"localhost"
+							],
+							"port": "8083",
+							"path": [
+								"valefood",
+								"promos",
+								"{{idPromo}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
